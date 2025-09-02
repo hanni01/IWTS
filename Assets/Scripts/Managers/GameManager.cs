@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        Initialize();
     }
 
     public void OnApplicationQuit()
