@@ -91,6 +91,9 @@ public class SceneManager : IManager
         {
             await UniTask.Yield(PlayerLoopTiming.Update);
         }
+
+        //프레임 렌더링까지 기다리기
+        await UniTask.WaitForEndOfFrame();
     }
 
     public void UpdateLoadingUI(string text, float progress)
