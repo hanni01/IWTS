@@ -16,10 +16,13 @@ public class HealthSystem : MonoBehaviour
 
     public void ApplyDamage(float amount)
     {
-        if (IsDead || amount <= 0f) return;
-        currentHealth = Mathf.Max(0f, currentHealth - amount);
-        onDamaged?.Invoke();
-        if (currentHealth <= 0f) Die();
+        currentHealth -= amount;
+        Debug.Log($"Ã¼·Â: {currentHealth}");
+
+        if (currentHealth <= 0f)
+        {
+            Die();
+        }
     }
 
     private void Die()

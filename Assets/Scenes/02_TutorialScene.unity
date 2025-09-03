@@ -1404,6 +1404,7 @@ GameObject:
   - component: {fileID: 2023705159}
   - component: {fileID: 2023705158}
   - component: {fileID: 2023705164}
+  - component: {fileID: 2023705165}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -1564,6 +1565,24 @@ MonoBehaviour:
   - {fileID: 8400000, guid: 850d371799876c34c900c68e45fe010f, type: 2}
   - {fileID: 8400000, guid: 513cc2a1e0c517e4daeed9c4fef6d420, type: 2}
   lightThreshold: 0.48
+  healthSystem: {fileID: 0}
+  damagePerSecond: 10
+--- !u!114 &2023705165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2023705157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: effc89e21f3aabe42afcc8fde4a2f2cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  onDamaged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
