@@ -10,3 +10,11 @@ public static class Scenes
     public const string FINAL = "04_FinalStepScene";
     public const string TEST = "test_hallway";
 }
+
+public enum AchievementKey
+{
+    NONE = 0,
+    ALIVE = 1,
+    POTENTIAL = 2,
+    STRONGER = 3,
+}
