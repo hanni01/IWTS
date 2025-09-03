@@ -17,7 +17,7 @@ public class StageManager : IManager
         {
             Scenes.TUTORIAL,
             Scenes.STEP1,
-            Scenes.STEP2,
+            Scenes.FINAL,
         };
     }
 
@@ -40,10 +40,21 @@ public class StageManager : IManager
             string nextStageName = _allStages[currentStageIdx + 1];
             GameManager.Scene.LoadScene(nextStageName);
         }
+
+        if(stageName == Scenes.FINAL)
+        {
+            FinalClear();
+        }
     }
 
     public bool IsStageCleared(string stageName)
     {
         return clearedStages.Contains(stageName);
+    }
+
+    private void FinalClear()
+    {
+        //마지막 연출 이후 메인씬으로 이동
+        GameManager.Scene.LoadScene(Scenes.START);
     }
 }
