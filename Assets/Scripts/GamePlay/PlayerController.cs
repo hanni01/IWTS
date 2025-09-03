@@ -69,6 +69,8 @@ public class PlayerController : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        // Enable interpolation so rendered transform stays smooth between physics updates
+        _rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
     // Update: 입력/상태 타이머 업데이트

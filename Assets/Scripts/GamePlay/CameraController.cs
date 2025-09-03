@@ -3,11 +3,11 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [SerializeField] Transform target;
-    [SerializeField] Vector3 offset = new Vector3(0.01f, 1.58f, -6.91f);
+    [SerializeField] Vector3 offset = new Vector3(0.01f, 1.58f, -9.8f);
     [SerializeField] float followSpeed = 5f;
 
     private float maxY = 4f;
-    private float minZ = -5.07f;
+    private float minZ = -9.87f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
