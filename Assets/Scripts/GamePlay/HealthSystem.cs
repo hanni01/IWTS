@@ -1,0 +1,37 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class HealthSystem : MonoBehaviour
+{
+    public float maxHealth = 100f;
+    private float currentHealth;
+
+    public bool IsDead => currentHealth <= 0f;
+    public UnityEngine.Events.UnityEvent onDamaged;
+
+    private void Awake()
+    {
+        currentHealth = maxHealth;
+    }
+
+    public void ApplyDamage(float amount)
+    {
+        if (IsDead || amount <= 0f) return;
+        currentHealth = Mathf.Max(0f, currentHealth - amount);
+        onDamaged?.Invoke();
+        if (currentHealth <= 0f) Die();
+    }
+
+    private void Die()
+    {
+        Debug.Log("사망! 스테이지 처음으로 돌아갑니다.");
+        
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+        UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex); // 지금 플레이한 씬 처음 불러오기
+    }
+
+    public void RestoreFull()
+    {
+        currentHealth = maxHealth;
+    }
+}

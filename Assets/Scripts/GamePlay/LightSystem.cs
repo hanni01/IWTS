@@ -8,12 +8,18 @@ public class LightSystem : MonoBehaviour
     private int textureSize;
     public float lightThreshold = 0.48f;
 
+    // 체력 시스템
+    public HealthSystem healthSystem;
+    public float damagePerSecond = 10f;
+
     void Start()
     {
         // 텍스쳐 하나 가져와서 사이즈 저장
         textureSize = rTexture[0].width;
 
         tex2D = new Texture2D(textureSize, textureSize, TextureFormat.RGB24, false);
+
+        healthSystem = GetComponent<HealthSystem>();
     }
 
     // RenderTexture에서 한 번이라도 완전 흰색 픽셀이 발견되면 true 반환
@@ -43,9 +49,10 @@ public class LightSystem : MonoBehaviour
     {
         isExposedToLight = CheckWhitePixel();
 
-        if (isExposedToLight)
+        if (isExposedToLight && healthSystem != null)
         {
             Debug.Log("빛에 노출되었습니다!");
+            healthSystem.ApplyDamage(damagePerSecond * Time.deltaTime); // 데미지 주기
         }
     }
 }
