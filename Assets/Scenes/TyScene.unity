@@ -1202,6 +1202,7 @@ MonoBehaviour:
   onDamaged:
     m_PersistentCalls:
       m_Calls: []
+  playerRenderer: {fileID: 0}
 --- !u!114 &1107729216
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1223,6 +1224,8 @@ MonoBehaviour:
   lightThreshold: 0.48
   healthSystem: {fileID: 1107729215}
   damagePerSecond: 10
+  headParticleSystem: {fileID: 0}
+  particleShowSeconds: 0.5
 --- !u!114 &1107729217
 MonoBehaviour:
   m_ObjectHideFlags: 0
