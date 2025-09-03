@@ -344,7 +344,7 @@ GameObject:
   - component: {fileID: 993002548}
   - component: {fileID: 993002547}
   - component: {fileID: 993002546}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1427,7 +1427,18 @@ MonoBehaviour:
   _acceleration: 20
   _deceleration: 25
   _rotationSpeed: 720
-  moveAction: {fileID: 3104538183898528075, guid: 376c3127117db9044a7d12370ecfb92b, type: 3}
+  _jumpForce: 12
+  _jumpGravityMultiplier: 2
+  _fallMultiplier: 3
+  _airControlMultiplier: 0.7
+  _coyoteTime: 0.15
+  _jumpBufferTime: 0.15
+  _groundCheckPoint: {fileID: 0}
+  _groundCheckRadius: 0.2
+  _groundCheckDistance: 0.3
+  _groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &6425078610834019352
 GameObject:
   m_ObjectHideFlags: 0
