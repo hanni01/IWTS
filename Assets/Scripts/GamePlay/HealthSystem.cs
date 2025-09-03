@@ -19,6 +19,9 @@ public class HealthSystem : MonoBehaviour
         currentHealth -= amount;
         Debug.Log($"체력: {currentHealth}");
 
+        // 이벤트 호출 지점
+        onDamaged?.Invoke();
+
         if (currentHealth <= 0f)
         {
             Die();
