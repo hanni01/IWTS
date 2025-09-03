@@ -50,7 +50,7 @@ public class StageManager : IManager
             var hs = player?.GetComponent<HealthSystem>();
 
             // 업적 조건 체크
-            if (hs != null && hs.currentHealth > 90 && stageName == Scenes.STEP1 &&
+            if (hs != null && hs.currentHealth > 50 && stageName == Scenes.STEP1 &&
                 !GameManager.Accomplishment.IsUnlocked((int)AchievementKey.POTENTIAL))
             {
                 // 업적 달성 팝업 끝까지 기다린 후 다음 씬 로드
@@ -82,7 +82,7 @@ public class StageManager : IManager
         var player = GameObject.Find("FinalPlayer");
         var hs = player?.GetComponent<HealthSystem>();
 
-        if (hs != null && hs.currentHealth > 90 &&
+        if (hs != null && hs.currentHealth > 50 &&
             !GameManager.Accomplishment.IsUnlocked((int)AchievementKey.STRONGER))
         {
             await GameManager.Accomplishment.UnLock((int)AchievementKey.STRONGER);

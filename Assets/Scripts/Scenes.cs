@@ -17,4 +17,5 @@ public enum AchievementKey
     ALIVE = 1,
     POTENTIAL = 2,
     STRONGER = 3,
+    HIDDEN = 4,
 }
