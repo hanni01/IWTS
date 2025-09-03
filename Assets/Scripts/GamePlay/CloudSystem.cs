@@ -23,6 +23,9 @@ public class CloudSystem : MonoBehaviour
 
     private Coroutine _spawnLoop;
 
+    // 현재 순서를 기록할 인덱스
+    private int currentIndex = 0;
+
     private void OnEnable()
     {
         _spawnLoop = StartCoroutine(SpawnLoop());
@@ -50,7 +53,10 @@ public class CloudSystem : MonoBehaviour
     {
         if (cloudPrefabs == null || cloudPrefabs.Length == 0) return;
 
-        GameObject prefab = cloudPrefabs[Random.Range(0, cloudPrefabs.Length)];
+        // 순서대로 prefab 선택
+        GameObject prefab = cloudPrefabs[currentIndex];
+        currentIndex = (currentIndex + 1) % cloudPrefabs.Length;
+
         float x = Random.Range(Mathf.Min(minX, maxX), Mathf.Max(minX, maxX));
         Vector3 pos = new Vector3(x, yFixed, zStart);
 
