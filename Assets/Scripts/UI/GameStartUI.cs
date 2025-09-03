@@ -13,7 +13,7 @@ public class GameStartUI : MonoBehaviour
         // 우선 클릭으로도 시작할 수 있게 둔다.
         gameStartBtn.onClick.AddListener(() =>
         {
-            GameManager.Scene.LoadScene(Scenes.TUTORIAL);
+            GameManager.Scene.LoadScene(Scenes.TEST);
         });
     }
 
@@ -21,7 +21,7 @@ public class GameStartUI : MonoBehaviour
     {
         if (Input.anyKeyDown)
         {
-            GameManager.Scene.LoadScene(Scenes.TUTORIAL);
+            GameManager.Scene.LoadScene(Scenes.TEST);
         }
 
         float t = Mathf.PingPong(Time.time * _speed, 1f);
