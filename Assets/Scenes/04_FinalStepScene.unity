@@ -23352,6 +23352,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: FinalPlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 5954619754561879924, guid: 84741018164ca764f99b183b2f643be6, type: 3}
+      propertyPath: _jumpForce
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5954619754561879924, guid: 84741018164ca764f99b183b2f643be6, type: 3}
+      propertyPath: _moveSpeed
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5954619754561879924, guid: 84741018164ca764f99b183b2f643be6, type: 3}
+      propertyPath: _acceleration
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 5954619754561879924, guid: 84741018164ca764f99b183b2f643be6, type: 3}
+      propertyPath: _deceleration
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 7444611042209350989, guid: 84741018164ca764f99b183b2f643be6, type: 3}
       propertyPath: onDamaged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 

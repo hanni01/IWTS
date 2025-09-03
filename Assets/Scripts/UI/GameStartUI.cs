@@ -1,7 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using UnityEditor.Rendering;
 
 public class GameStartUI : MonoBehaviour
 {
