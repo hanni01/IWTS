@@ -18,7 +18,7 @@ public class LoadingUI : MonoBehaviour
         }
 
         _progressValue = Mathf.Lerp(0f, 1f, progress);
-
+        if (progressBar == null) return;
         progressBar.fillAmount = _progressValue;
         progressText.text = "Loading... " + text;
     }

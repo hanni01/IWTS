@@ -206,14 +206,31 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnParticleCollision(GameObject goal)
+    private async void OnParticleCollision(GameObject goal)
     {
-        // goal 오브젝트의 태그가 Goal인지 확인
-        if (!goal.CompareTag("Goal")) return;
+        if (goal.CompareTag("Hidden"))
+        {
+            Debug.Log("히든 골 도달");
+            if (!GameManager.Accomplishment.IsUnlocked((int)AchievementKey.HIDDEN))
+            {
+                await GameManager.Accomplishment.UnLock((int)AchievementKey.HIDDEN);
 
-        var currentStageName = UnitySceneManager.GetActiveScene().name;
-        Debug.Log($"골인 지점 도달 {currentStageName}");
-        GameManager.Stage.ClearedStage(currentStageName);
+                if (UnitySceneManager.GetActiveScene().name != Scenes.START)
+                {
+                    GameManager.Scene.LoadScene(Scenes.START);
+
+                    return;
+                }
+            }
+        }
+
+        if (goal.CompareTag("Goal"))
+        {
+            var currentStageName = UnitySceneManager.GetActiveScene().name;
+            Debug.Log($"골인 지점 도달 {currentStageName}");
+            GameManager.Stage.ClearedStage(currentStageName);
+        }
+        
     }
 
     #endregion

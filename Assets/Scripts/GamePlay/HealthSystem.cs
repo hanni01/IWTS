@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 public class HealthSystem : MonoBehaviour
 {
     public float maxHealth = 100f;
-    private float currentHealth;
+    public float currentHealth { get; private set; }
 
     public bool IsDead => currentHealth <= 0f;
     public UnityEngine.Events.UnityEvent onDamaged;
