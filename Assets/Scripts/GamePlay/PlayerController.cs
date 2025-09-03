@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 // 플레이어 캐릭터의 이동과 점프를 제어하는 스크립트입니다.
 // Rigidbody 기반의 물리 계산을 사용하며, 일관된 단일 점프 로직을 가집니다.
@@ -200,6 +202,13 @@ public class PlayerController : MonoBehaviour
                 _rb.linearVelocity += Vector3.up * Physics.gravity.y * (_jumpGravityMultiplier - 1) * Time.fixedDeltaTime;
             }
         }
+    }
+
+    private void OnParticleCollision(GameObject goal)
+    {
+        var currentStageName = UnitySceneManager.GetActiveScene().name;
+        Debug.Log($"골인 지점 도달 {currentStageName}");
+        GameManager.Stage.ClearedStage(currentStageName);
     }
 
     #endregion

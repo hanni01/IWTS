@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
@@ -91,6 +92,18 @@ public class SceneManager : IManager
         {
             await UniTask.Yield(PlayerLoopTiming.Update);
         }
+
+/*        var eventSystem = Object.FindObjectsByType<EventSystem>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+
+        if(eventSystem.Length > 1)
+        {
+            UnityEngine.Object.Destroy(eventSystem[0]);
+        }*/
+
+        //프레임 렌더링까지 기다리기
+        await UniTask.WaitForEndOfFrame();
     }
 
     public void UpdateLoadingUI(string text, float progress)
