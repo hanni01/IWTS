@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
     public static SceneManager Scene { get; } = new();
     public static StageManager Stage { get; } = new();
     public static AccomplishmentManager Accomplishment { get; } = new();
@@ -12,6 +13,13 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if(Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
         DontDestroyOnLoad(gameObject);
         Initialize();
     }
