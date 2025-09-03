@@ -32,6 +32,7 @@ public class StageManager : IManager
     /// <param name="stageName">스테이지 씬 이름</param>
     public void ClearedStage(string stageName)
     {
+        Debug.Log($"{stageName} 클리어");
         clearedStages.Add(stageName);
         int currentStageIdx = _allStages.IndexOf(stageName);
         if(currentStageIdx != -1 && currentStageIdx + 1 < _allStages.Count)
