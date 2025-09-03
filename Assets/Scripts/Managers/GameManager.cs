@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static SceneManager Scene { get; } = new();
     public static StageManager Stage { get; } = new();
+    public static AccomplishmentManager Accomplishment { get; } = new();
 
     private bool _isDestroyManager;
 
@@ -26,6 +27,7 @@ public class GameManager : MonoBehaviour
         {
             Scene,
             Stage,
+            Accomplishment,
         };
 
         foreach (var manager in managers)
@@ -48,6 +50,7 @@ public class GameManager : MonoBehaviour
         {
             Scene,
             Stage,
+            Accomplishment,
         };
 
         foreach(var manager in managers)
