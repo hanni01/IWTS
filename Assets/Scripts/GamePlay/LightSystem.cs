@@ -45,22 +45,60 @@ public class LightSystem : MonoBehaviour
         return false;
     }
 
+
+    private bool wasExposedToLight = false;  // 이전 프레임 노출 상태
+
+    public GameObject headParticle;
+
+
+    // 햇빛 들어갈 때 켜졌다가 이 시간 후 자동으로 꺼짐
+    public float particleShowSeconds = 2f;
+
     void Update()
     {
+        // 현재 햇빛 노출 판정
         isExposedToLight = CheckWhitePixel();
 
+        // 지속 데미지(노출 중에만)
         if (isExposedToLight && healthSystem != null)
+            healthSystem.ApplyDamage(damagePerSecond * Time.deltaTime);
+
+        // 상태 전이 감지
+        if (isExposedToLight && !wasExposedToLight)
         {
-            Debug.Log("빛에 노출되었습니다!");
-            healthSystem.ApplyDamage(damagePerSecond * Time.deltaTime); // 데미지 주기
-
-
+            // 햇빛에 처음 들어옴
+            Debug.Log("빛에 노출 시작!");
             SoundManager.Instance.StartLoopSFX(SoundId.longSizzle);
+
+            if (headParticle != null)
+            {
+                headParticle.SetActive(true);
+                CancelInvoke(nameof(DisableHeadParticle));
+                Invoke(nameof(DisableHeadParticle), particleShowSeconds);
+            }
         }
-        else
+        else if (!isExposedToLight && wasExposedToLight)
         {
-            // 효과음 반복 재생 멈춤.
+            // 그림자에 처음 들어옴
+            Debug.Log("빛 노출 종료!");
             SoundManager.Instance.StopLoopSFX();
+
+            if (headParticle != null)
+            {
+                CancelInvoke(nameof(DisableHeadParticle));
+                headParticle.SetActive(false);
+            }
         }
+
+        // 상태 갱신
+        wasExposedToLight = isExposedToLight;
     }
+
+    void DisableHeadParticle()
+    {
+        if (headParticle != null)
+            headParticle.SetActive(false);
+    }
+
+
 }

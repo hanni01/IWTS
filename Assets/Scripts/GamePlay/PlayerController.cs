@@ -206,6 +206,9 @@ public class PlayerController : MonoBehaviour
 
     private void OnParticleCollision(GameObject goal)
     {
+        // goal 오브젝트의 태그가 Goal인지 확인
+        if (!goal.CompareTag("Goal")) return;
+
         var currentStageName = UnitySceneManager.GetActiveScene().name;
         Debug.Log($"골인 지점 도달 {currentStageName}");
         GameManager.Stage.ClearedStage(currentStageName);
