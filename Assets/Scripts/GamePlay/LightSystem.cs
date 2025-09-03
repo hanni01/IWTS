@@ -53,6 +53,14 @@ public class LightSystem : MonoBehaviour
         {
             Debug.Log("빛에 노출되었습니다!");
             healthSystem.ApplyDamage(damagePerSecond * Time.deltaTime); // 데미지 주기
+
+
+            SoundManager.Instance.StartLoopSFX(SoundId.longSizzle);
+        }
+        else
+        {
+            // 효과음 반복 재생 멈춤.
+            SoundManager.Instance.StopLoopSFX();
         }
     }
 }
