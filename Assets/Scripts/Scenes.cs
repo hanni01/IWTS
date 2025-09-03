@@ -8,4 +8,5 @@ public static class Scenes
     public const string START = "01_StartScene";
     public const string STEP1 = "03_Step1Scene";
     public const string FINAL = "04_FinalStepScene";
+    public const string TEST = "test_hallway";
 }
