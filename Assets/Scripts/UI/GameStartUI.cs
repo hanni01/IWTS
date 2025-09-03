@@ -1,27 +1,37 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor.Rendering;
 
 public class GameStartUI : MonoBehaviour
 {
     [SerializeField] private Button gameStartBtn;
+    [SerializeField] private Button achievementBtn;
+    [SerializeField] private GameObject achievementPanel;
     [SerializeField] private Graphic target;
+
     private float _speed = 1f;
 
     private void Awake()
     {
-        // 우선 클릭으로도 시작할 수 있게 둔다.
-        gameStartBtn.onClick.AddListener(() =>
+        achievementBtn.onClick.AddListener(() =>
         {
-            GameManager.Scene.LoadScene(Scenes.TEST);
+            achievementPanel.SetActive(true);
         });
     }
 
     private void Update()
     {
-        if (Input.anyKeyDown)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            GameManager.Scene.LoadScene(Scenes.TEST);
+            if (achievementPanel.activeSelf)
+            {
+                achievementPanel.SetActive(false);
+            }
+            else
+            {
+                GameManager.Scene.LoadScene(Scenes.TUTORIAL);
+            }
         }
 
         float t = Mathf.PingPong(Time.time * _speed, 1f);
