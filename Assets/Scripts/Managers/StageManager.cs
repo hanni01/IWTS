@@ -1,14 +1,12 @@
+using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class StageManager : IManager
 {
-    /// <summary>
-    /// 통과한 스테이지 씬 이름을 담아두는 변수, 솔직히 필요없긴 한데 일단 넣음
-    /// </summary>
     private static readonly HashSet<string> clearedStages = new();
-
     public List<string> _allStages;
 
     public void Initialize()
@@ -27,34 +25,73 @@ public class StageManager : IManager
     }
 
     /// <summary>
-    /// 스테이지 통과하였을때 호출하는 메서드
+    /// 스테이지 클리어 시 호출
     /// </summary>
-    /// <param name="stageName">스테이지 씬 이름</param>
-    public void ClearedStage(string stageName)
+    public async void ClearedStage(string stageName)
     {
         Debug.Log($"{stageName} 클리어");
         clearedStages.Add(stageName);
+
         int currentStageIdx = _allStages.IndexOf(stageName);
-        if(currentStageIdx != -1 && currentStageIdx + 1 < _allStages.Count)
+
+        // 마지막 스테이지일 경우
+        if (stageName == Scenes.FINAL)
+        {
+            await FinalClear();
+            return;
+        }
+
+        //다음 스테이지가 있는 경우
+        if (currentStageIdx != -1 && currentStageIdx + 1 < _allStages.Count)
         {
             string nextStageName = _allStages[currentStageIdx + 1];
-            GameManager.Scene.LoadScene(nextStageName);
-        }
 
-        if(stageName == Scenes.FINAL)
+            var player = GameObject.Find("ColorPlayer");
+            var hs = player?.GetComponent<HealthSystem>();
+
+            // 업적 조건 체크
+            if (hs != null && hs.currentHealth > 90 && stageName == Scenes.STEP1 &&
+                !GameManager.Accomplishment.IsUnlocked((int)AchievementKey.POTENTIAL))
+            {
+                // 업적 달성 팝업 끝까지 기다린 후 다음 씬 로드
+                await GameManager.Accomplishment.UnLock((int)AchievementKey.POTENTIAL);
+            }
+
+            // 씬 전환은 무조건 한 번만
+            if(UnitySceneManager.GetActiveScene().name != nextStageName)
+            {
+                GameManager.Scene.LoadScene(nextStageName);
+            }
+        }
+    }
+
+    public bool IsStageCleared(string stageName) => clearedStages.Contains(stageName);
+
+    /// <summary>
+    /// 최종 스테이지 클리어 처리
+    /// </summary>
+    private async Task FinalClear()
+    {
+        // ALIVE 업적
+        if (!GameManager.Accomplishment.IsUnlocked((int)AchievementKey.ALIVE))
         {
-            FinalClear();
+            await GameManager.Accomplishment.UnLock((int)AchievementKey.ALIVE);
         }
-    }
 
-    public bool IsStageCleared(string stageName)
-    {
-        return clearedStages.Contains(stageName);
-    }
+        // STRONGER 업적
+        var player = GameObject.Find("ColorPlayer");
+        var hs = player?.GetComponent<HealthSystem>();
 
-    private void FinalClear()
-    {
-        //마지막 연출 이후 메인씬으로 이동
-        GameManager.Scene.LoadScene(Scenes.START);
+        if (hs != null && hs.currentHealth > 90 &&
+            !GameManager.Accomplishment.IsUnlocked((int)AchievementKey.STRONGER))
+        {
+            await GameManager.Accomplishment.UnLock((int)AchievementKey.STRONGER);
+        }
+
+        //마지막에 딱 한 번만 씬 전환
+        if (UnitySceneManager.GetActiveScene().name != Scenes.START)
+        {
+            GameManager.Scene.LoadScene(Scenes.START);
+        }
     }
 }
