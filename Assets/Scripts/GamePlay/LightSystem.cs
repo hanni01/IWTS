@@ -9,8 +9,18 @@ public class LightSystem : MonoBehaviour
     public float lightThreshold = 0.48f;
 
     // 체력 시스템
+    [Header("Health")]
     public HealthSystem healthSystem;
     public float damagePerSecond = 10f;
+
+    // 빛
+    private bool wasExposedToLight = false;  // 이전 프레임 노출 상태
+
+    [Header("Particle")]
+    public ParticleSystem headParticleSystem;  // GameObject 대신 ParticleSystem 참조
+
+    // 그림자로 들어간 뒤 이 시간 후 파티클 방출 중지
+    public float particleShowSeconds = 0.5f;
 
     void Start()
     {
@@ -47,20 +57,48 @@ public class LightSystem : MonoBehaviour
 
     void Update()
     {
+        // 현재 햇빛 노출 판정
         isExposedToLight = CheckWhitePixel();
 
+        // 지속 데미지(노출 중에만)
         if (isExposedToLight && healthSystem != null)
+            healthSystem.ApplyDamage(damagePerSecond * Time.deltaTime);
+
+        // 상태 전이 감지
+        if (isExposedToLight && !wasExposedToLight)
         {
-            Debug.Log("빛에 노출되었습니다!");
-            healthSystem.ApplyDamage(damagePerSecond * Time.deltaTime); // 데미지 주기
-
-
+            // 햇빛에 처음 들어옴
+            Debug.Log("빛에 노출 시작!");
             SoundManager.Instance.StartLoopSFX(SoundId.longSizzle);
+
+            if (headParticleSystem != null)
+            {
+                headParticleSystem.Play(); // 방출 시작
+                CancelInvoke(nameof(DisableHeadParticle));
+            }
         }
-        else
+        else if (!isExposedToLight && wasExposedToLight)
         {
-            // 효과음 반복 재생 멈춤.
+            // 그림자에 처음 들어옴
+            Debug.Log("빛 노출 종료!");
             SoundManager.Instance.StopLoopSFX();
+
+            if (headParticleSystem != null)
+            {
+                CancelInvoke(nameof(DisableHeadParticle));
+                Invoke(nameof(DisableHeadParticle), particleShowSeconds);
+            }
         }
+
+        // 상태 갱신
+        wasExposedToLight = isExposedToLight;
     }
+
+    void DisableHeadParticle()
+    {
+        if (headParticleSystem != null)
+            headParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        // 이미 생성된 파티클은 자연 소멸, 새 파티클만 중지
+    }
+
 }
