@@ -46,7 +46,7 @@ public class StageManager : IManager
         {
             string nextStageName = _allStages[currentStageIdx + 1];
 
-            var player = GameObject.Find("ColorPlayer");
+            var player = GameObject.Find("FinalPlayer");
             var hs = player?.GetComponent<HealthSystem>();
 
             // 업적 조건 체크
@@ -79,7 +79,7 @@ public class StageManager : IManager
         }
 
         // STRONGER 업적
-        var player = GameObject.Find("ColorPlayer");
+        var player = GameObject.Find("FinalPlayer");
         var hs = player?.GetComponent<HealthSystem>();
 
         if (hs != null && hs.currentHealth > 90 &&
