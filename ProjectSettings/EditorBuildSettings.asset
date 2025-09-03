@@ -18,7 +18,7 @@ EditorBuildSettings:
     path: Assets/Scenes/03_Step1Scene.unity
     guid: 8d06a70d3ce0ca04f98a6edf73865437
   - enabled: 1
-    path: Assets/Scenes/04_Step2Scene.unity
+    path: Assets/Scenes/04_FinalStepScene.unity
     guid: a0408477db8a6614c8e2b91618a33977
   - enabled: 1
     path: Assets/Scenes/00_LoadingScene.unity
