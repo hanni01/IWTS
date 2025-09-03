@@ -1,129 +1,207 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// 플레이어 캐릭터의 이동과 점프를 제어하는 스크립트입니다.
+// Rigidbody 기반의 물리 계산을 사용하며, 일관된 단일 점프 로직을 가집니다.
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
-    // 이동 관련 설정
-    [Header("Movement Settings")]
-    // 최대 이동 속도 (Inspector에서 조정 가능)
-    public float _moveSpeed = 5f;
-    // 정지에서 최대 속도에 도달할 때까지의 가속량(클수록 더 빨리 속도 증가)
-    public float _acceleration = 20f;
-    // 입력 해제 시 감속률(클수록 더 빠르게 멈춤)
-    public float _deceleration = 25f;
-    // 캐릭터가 이동 방향을 바라보는 회전 속도(도/초)
-    public float _rotationSpeed = 720f; // degrees per second
+    #region 인스펙터 변수
 
-    // 입력 관련
-    [Header("Input")]
-    // PlayerControls 에서 만든 'Move' 액션을 참조할 InputActionReference.
-    // 이 필드에 에셋에서 생성한 Move 액션을 드래그해서 연결하세요 (Vector2).
-    public InputActionReference moveAction;
+    [Header("MOVEMENT SETTINGS")]
+    [Tooltip("캐릭터의 최대 이동 속도입니다.")]
+    [SerializeField] private float _moveSpeed = 7f;
+    [Tooltip("최대 속도에 도달하기까지의 가속도입니다. 높을수록 빠르게 최대 속도에 도달합니다.")]
+    [SerializeField] private float _acceleration = 80f;
+    [Tooltip("입력이 없을 때 정지하기까지의 감속도입니다. 높을수록 빠르게 멈춥니다.")]
+    [SerializeField] private float _deceleration = 120f;
+    [Tooltip("캐릭터가 이동 방향으로 회전하는 속도입니다.")]
+    [SerializeField] private float _rotationSpeed = 1080f;
 
-    // 내부 상태 저장용 필드
-    Rigidbody _rb; // 이 스크립트가 제어할 Rigidbody 컴포넌트
-    Vector2 _moveInput; // 최신 입력값 (x: 좌/우, y: 앞/뒤)
-    Vector3 _currentPlanarVelocity; // X-Z 평면에서 현재 목표 속도(중력 영향은 Y 컴포넌트로 별도 유지)
+    [Header("JUMP SETTINGS")]
+    [Tooltip("점프 시 가해지는 초기 힘의 크기입니다.")]
+    [SerializeField] private float _jumpForce = 12f;
+    [Tooltip("점프하여 상승하는 동안 적용될 중력 배율입니다. 높을수록 덜 붕 뜹니다.")]
+    [SerializeField] private float _jumpGravityMultiplier = 2.0f;
+    [Tooltip("점프 정점에서 떨어질 때 적용되는 추가 중력 배율입니다. (쫀득한 점프감)")]
+    [SerializeField] private float _fallMultiplier = 3.0f;
+    [Tooltip("공중에서 캐릭터를 좌우로 제어할 수 있는 정도입니다. (0: 제어 불가, 1: 지상과 동일)")]
+    [SerializeField][Range(0f, 1f)] private float _airControlMultiplier = 0.7f;
 
-    // Awake: 컴포넌트 초기화 및 Rigidbody 제약 적용
-    void Awake()
+    [Header("RESPONSIVENESS BUFFERS")]
+    [Tooltip("발판에서 떨어진 직후에도 점프가 가능한 유예 시간입니다.")]
+    [SerializeField] private float _coyoteTime = 0.15f;
+    [Tooltip("착지 직전에 점프를 미리 입력할 수 있는 유예 시간입니다.")]
+    [SerializeField] private float _jumpBufferTime = 0.15f;
+
+    [Header("GROUND DETECTION")]
+    [Tooltip("지면을 감지할 위치를 지정하는 Transform 입니다. (미지정 시 캐릭터 위치 사용)")]
+    [SerializeField] private Transform _groundCheckPoint;
+    [Tooltip("지면 감지 SphereCast의 반지름입니다.")]
+    [SerializeField] private float _groundCheckRadius = 0.2f;
+    [Tooltip("지면 감지 SphereCast의 길이입니다.")]
+    [SerializeField] private float _groundCheckDistance = 0.3f;
+    [Tooltip("지면으로 인식할 레이어를 설정합니다.")]
+    [SerializeField] private LayerMask _groundLayer;
+
+    #endregion
+
+    #region 내부 상태 변수
+
+    // Rigidbody 컴포넌트(이 스크립트가 제어하는 물리 몸체)
+    private Rigidbody _rb;
+
+    // 입력값 및 상태
+    private Vector2 _moveInput;            // 최신 이동 입력값 (x: 좌/우, y: 앞/뒤)
+    private bool _isGrounded;              // 현재 지면에 닿아있는지 여부
+    private float _coyoteTimeCounter;      // 코요테 타이머 카운터
+    private float _jumpBufferCounter;      // 점프 버퍼 타이머 카운터
+
+    #endregion
+
+    #region 유니티 라이프사이클
+
+    // Awake: 컴포넌트 초기화, Rigidbody 제약 설정
+    private void Awake()
     {
-        // Rigidbody 컴포넌트 획득
         _rb = GetComponent<Rigidbody>();
-        if (_rb == null)
-        {
-            // 없으면 런타임에 추가하고 경고 출력
-            Debug.LogWarning("PlayerController requires a Rigidbody. Adding one at runtime.");
-            _rb = gameObject.AddComponent<Rigidbody>();
-        }
-
-        // 사양에 따른 Rigidbody 제약 설정
-        // Y 위치 고정은 제거하여 중력이 동작하도록 함. 다만 X/Z 축 회전은 고정하여 흔들림 방지.
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-
-        // 초기 평면 속도는 Rigidbody의 현재 속도에서 X,Z만 취함
-        // (Y 성분은 중력/점프 등 물리 시스템에 맡김)
-        _currentPlanarVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
     }
 
-    // OnEnable: InputAction 콜백 등록 및 활성화
-    void OnEnable()
+    // Update: 입력/상태 타이머 업데이트
+    private void Update()
     {
-        // moveAction이 유효하면 performed와 canceled 이벤트를 구독
-        if (moveAction != null && moveAction.action != null)
+        HandleState();
+        HandleTimers();
+    }
+
+    // FixedUpdate: 물리 연산(점프, 이동, 중력) 처리
+    private void FixedUpdate()
+    {
+        HandleJump();
+        HandleMovement();
+        HandleGravity();
+    }
+
+    // 에디터에서 값 입력 시 최소값 검증
+    private void OnValidate()
+    {
+        _jumpForce = Mathf.Max(0f, _jumpForce);
+        _jumpGravityMultiplier = Mathf.Max(1f, _jumpGravityMultiplier);
+        _fallMultiplier = Mathf.Max(1f, _fallMultiplier);
+    }
+
+    #endregion
+
+    #region 입력 처리 (PlayerInput에서 호출)
+
+    // Move 액션 콜백: 이동 입력 업데이트
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        _moveInput = context.ReadValue<Vector2>();
+    }
+
+    // Jump 액션 콜백: performed 시점에 점프 버퍼 활성화
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed)
         {
-            moveAction.action.performed += OnMovePerformed;
-            moveAction.action.canceled += OnMoveCanceled;
-            moveAction.action.Enable();
+            _jumpBufferCounter = _jumpBufferTime;
+        }
+    }
+
+    #endregion
+
+    #region 상태 판정 및 타이머
+
+    // 지면 판정: SphereCast를 사용하여 groundLayer에 해당하는 콜라이더를 감지
+    private void HandleState()
+    {
+        Transform groundCheckOrigin = _groundCheckPoint != null ? _groundCheckPoint : transform;
+        _isGrounded = Physics.SphereCast(groundCheckOrigin.position, _groundCheckRadius, Vector3.down, out _, _groundCheckDistance, _groundLayer);
+    }
+
+    // 코요테 타이머와 점프 버퍼 카운트 감소 처리
+    private void HandleTimers()
+    {
+        if (_isGrounded)
+        {
+            _coyoteTimeCounter = _coyoteTime;
         }
         else
         {
-            // 연결 누락 시 경고
-            Debug.LogWarning("Move ActionReference is not assigned on PlayerController. Assign the PlayerControls 'Move' action in the Inspector.");
+            _coyoteTimeCounter -= Time.deltaTime;
         }
-    }
 
-    // OnDisable: 콜백 해제 및 비활성화
-    void OnDisable()
-    {
-        if (moveAction != null && moveAction.action != null)
+        if (_jumpBufferCounter > 0)
         {
-            moveAction.action.performed -= OnMovePerformed;
-            moveAction.action.canceled -= OnMoveCanceled;
-            moveAction.action.Disable();
+            _jumpBufferCounter -= Time.deltaTime;
         }
     }
 
-    // 입력이 발생했을 때 호출되는 콜백
-    // performed 이벤트에서 입력 벡터를 읽어 _moveInput에 저장
-    void OnMovePerformed(InputAction.CallbackContext ctx)
+    #endregion
+
+    #region 물리 처리 (점프, 이동, 중력)
+
+    // 점프 실행: 코요테 및 버퍼 조건이 만족할 때 한 번의 점프를 수행
+    private void HandleJump()
     {
-        _moveInput = ctx.ReadValue<Vector2>();
-    }
-
-    // 입력이 취소되었을 때 호출되는 콜백
-    // 입력을 초기화하여 감속 로직으로 자연스럽게 멈추게 함
-    void OnMoveCanceled(InputAction.CallbackContext ctx)
-    {
-        _moveInput = Vector2.zero;
-    }
-
-    // FixedUpdate: 모든 물리 처리(속도 보간 및 회전)를 여기서 수행
-    void FixedUpdate()
-    {
-        // 목표 평면 속도 계산 (입력 x->X, 입력 y->Z)
-        Vector3 desiredPlanar = new Vector3(_moveInput.x, 0f, _moveInput.y) * _moveSpeed;
-
-        // 현재와 목표 속도의 크기 비교로 가속/감속 여부 결정
-        float currentMag = _currentPlanarVelocity.magnitude;
-        float desiredMag = desiredPlanar.magnitude;
-
-        // 한 프레임에서 허용할 최대 속도 변화량 계산
-        float maxDelta = (desiredMag > currentMag) ? _acceleration * Time.fixedDeltaTime : _deceleration * Time.fixedDeltaTime;
-
-        // 속도를 부드럽게 목표 속도로 이동시킴 (갑작스러운 변화 방지)
-        _currentPlanarVelocity = Vector3.MoveTowards(_currentPlanarVelocity, desiredPlanar, maxDelta);
-
-        // Rigidbody의 velocity를 직접 설정하되 Y 성분은 기존 값을 유지하여 중력/낙하를 허용
-        _rb.linearVelocity = new Vector3(_currentPlanarVelocity.x, _rb.linearVelocity.y, _currentPlanarVelocity.z);
-
-        // 이동 중일 때만 캐릭터가 이동 방향을 바라보도록 회전 적용
-        if (_currentPlanarVelocity.sqrMagnitude > 0.001f)
+        if (_coyoteTimeCounter > 0f && _jumpBufferCounter > 0f)
         {
-            Vector3 lookDir = _currentPlanarVelocity.normalized;
-            Quaternion targetRot = Quaternion.LookRotation(lookDir, Vector3.up);
-            // 부드러운 회전 (최대 회전량은 _rotationSpeed * deltaTime)
-            Quaternion newRot = Quaternion.RotateTowards(_rb.rotation, targetRot, _rotationSpeed * Time.fixedDeltaTime);
-            _rb.MoveRotation(newRot);
+            // 수직 속도 초기화 후 즉시 상승 속도 부여
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+            _rb.AddForce(Vector3.up * _jumpForce, ForceMode.VelocityChange);
+            _jumpBufferCounter = 0f;
         }
     }
 
-    // 에디터에서 값 입력 시 최소값 보정
-    void OnValidate()
+    // 이동 처리: 월드 기준 입력을 사용하여 목표 속도로 부드럽게 보간
+    private void HandleMovement()
     {
-        _moveSpeed = Mathf.Max(0f, _moveSpeed);
-        _acceleration = Mathf.Max(0f, _acceleration);
-        _deceleration = Mathf.Max(0f, _deceleration);
-        _rotationSpeed = Mathf.Max(0f, _rotationSpeed);
+        Vector3 moveDirection = new Vector3(_moveInput.x, 0f, _moveInput.y);
+        float controlMultiplier = _isGrounded ? 1f : _airControlMultiplier;
+        Vector3 targetVelocity = moveDirection * _moveSpeed * controlMultiplier;
+
+        float accel = moveDirection.magnitude > 0.1f ? _acceleration : _deceleration;
+        Vector3 currentPlanarVelocity = new Vector3(_rb.linearVelocity.x, 0, _rb.linearVelocity.z);
+
+        Vector3 newPlanarVelocity = Vector3.MoveTowards(
+            currentPlanarVelocity,
+            targetVelocity,
+            accel * Time.fixedDeltaTime
+        );
+
+        _rb.linearVelocity = new Vector3(newPlanarVelocity.x, _rb.linearVelocity.y, newPlanarVelocity.z);
+
+        // 이동 중일 때만 캐릭터가 이동 방향을 바라보도록 회전
+        if (moveDirection.magnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            _rb.MoveRotation(Quaternion.RotateTowards(transform.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime));
+        }
     }
+
+    // 중력 보정: 공중에서만 가속도 기반의 중력 변화 적용
+    private void HandleGravity()
+    {
+        if (!_isGrounded)
+        {
+            float verticalVelocity = _rb.linearVelocity.y;
+
+            // 하강 시 중력 강화
+            if (verticalVelocity < 0)
+            {
+                _rb.linearVelocity += Vector3.up * Physics.gravity.y * (_fallMultiplier - 1) * Time.fixedDeltaTime;
+            }
+            // 상승 시 추가 중력 적용(부드러운 상승 억제)
+            else if (verticalVelocity > 0)
+            {
+                _rb.linearVelocity += Vector3.up * Physics.gravity.y * (_jumpGravityMultiplier - 1) * Time.fixedDeltaTime;
+            }
+        }
+    }
+
+    #endregion
 }
+
