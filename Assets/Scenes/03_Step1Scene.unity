@@ -9943,7 +9943,7 @@ MonoBehaviour:
   - {fileID: 8400000, guid: 513cc2a1e0c517e4daeed9c4fef6d420, type: 2}
   lightThreshold: 0.48
   healthSystem: {fileID: 7444611042745391075}
-  damagePerSecond: 10
+  damagePerSecond: 20
   headParticleSystem: {fileID: 2296202285903105622}
   particleShowSeconds: 0.3
 --- !u!4 &3378772605079784374
