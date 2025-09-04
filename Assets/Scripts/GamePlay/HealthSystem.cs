@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,6 +23,9 @@ public class HealthSystem : MonoBehaviour
 
     public void ApplyDamage(float amount)
     {
+        var ending = GameObject.FindObjectOfType<EndingEffect>();
+        if (ending != null && ending.isPlaying) return;
+
         currentHealth -= amount;
         Debug.Log($"Ã¼·Â: {currentHealth}");
 
