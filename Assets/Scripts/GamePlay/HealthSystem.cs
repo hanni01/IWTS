@@ -55,6 +55,10 @@ public class HealthSystem : MonoBehaviour
     {
         if (playerRenderer == null) return;
 
+        var ending = GameObject.FindObjectOfType<EndingEffect>();
+        if (ending != null && ending.isPlaying) return;
+
+
         // 체력이 0 아래로도 갈 수 있으므로 Clamp
         float clampedHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 

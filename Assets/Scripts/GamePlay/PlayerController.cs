@@ -60,6 +60,8 @@ public class PlayerController : MonoBehaviour
     private float _coyoteTimeCounter;      // 코요테 타이머 카운터
     private float _jumpBufferCounter;      // 점프 버퍼 타이머 카운터
 
+    private bool _isCollided = false;
+
     #endregion
 
     #region 유니티 라이프사이클
@@ -67,6 +69,7 @@ public class PlayerController : MonoBehaviour
     // Awake: 컴포넌트 초기화, Rigidbody 제약 설정
     private void Awake()
     {
+        _isCollided = false;
         _rb = GetComponent<Rigidbody>();
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         // Enable interpolation so rendered transform stays smooth between physics updates
@@ -208,6 +211,10 @@ public class PlayerController : MonoBehaviour
 
     private async void OnParticleCollision(GameObject goal)
     {
+        if (_isCollided) return;
+
+        _isCollided = true;
+
         if (goal.CompareTag("Hidden"))
         {
             Debug.Log("히든 골 도달");

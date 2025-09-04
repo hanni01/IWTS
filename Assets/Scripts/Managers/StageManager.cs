@@ -95,7 +95,7 @@ public class StageManager : IManager
             ending.PlayEnding();
 
             // 연출 끝날 때까지 대기
-            await UniTask.Delay(5000);
+            await UniTask.Delay(4000);
         }
 
         //마지막에 딱 한 번만 씬 전환

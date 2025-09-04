@@ -57,6 +57,9 @@ public class LightSystem : MonoBehaviour
 
     void Update()
     {
+        var ending = GameObject.FindObjectOfType<EndingEffect>();
+        if (ending != null && ending.isPlaying) return;
+
         // 현재 햇빛 노출 판정
         isExposedToLight = CheckWhitePixel();
 
