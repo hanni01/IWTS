@@ -119,7 +119,7 @@ public class AccomplishmentManager : IManager
         Object.DontDestroyOnLoad(instance);
         instance.SetActive(true);
 
-        await UniTask.Delay(3000, DelayType.UnscaledDeltaTime);
+        await UniTask.Delay(1000, DelayType.UnscaledDeltaTime);
 
         if(instance != null)
         {
