@@ -47,12 +47,13 @@
 
 ---
 
+
 ## 👥 팀원 연락처
 
-| 이름   | 이메일 |
-|--------|-----------------------------|
-| 박시현 | forgamedesign03@gmail.com   |
-| 조지은 | jieuncho99@gmail.com        |
-| 정하은 | he3080@gmail.com            |
-| 이태윤 | taeyoon0305@hanyang.ac.kr  |
+| 이름   | 담당 기능 | 이메일 |
+|--------|--------|-----------------------------|
+| 박시현 |캐릭터 조작 시스템 (Character Controller)|forgamedesign03@gmail.com   |
+| 조지은 |연출 및 시각 효과 (Visual & Presentation Effects) |jieuncho99@gmail.com        |
+| 정하은 |게임 진행 및 업적 관리 시스템 (Game Manager & Achievement System) |he3080@gmail.com            |
+| 이태윤 |빛 노출 감지 시스템 (Light Detection System) |taeyoon0305@hanyang.ac.kr  |
 
