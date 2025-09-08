@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ObstacleSystem : MonoBehaviour, IObstacle
 {
-    public bool IsStop => false;
+    public bool IsStop { get; set; } = false;
     [SerializeField] private float moveSpeed = 200f;
 
     void Start()

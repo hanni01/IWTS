@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IObstacle
 { 
-    bool IsStop { get; }
+    bool IsStop { get; set; }
 
     void Movement();
 }
