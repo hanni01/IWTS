@@ -28,7 +28,7 @@ public class GameStartUI : MonoBehaviour
             }
             else
             {
-                GameManager.Scene.LoadScene(Scenes.TUTORIAL);
+                GameManager.Backend.Initialize();
             }
         }
 

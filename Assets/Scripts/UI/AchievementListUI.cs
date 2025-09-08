@@ -10,10 +10,10 @@ public class AchievementListUI : MonoBehaviour
 
     void Start()
     {
-        for(int i = 1;i <= GameManager.Accomplishment._states.Count;i++)
+        for(int i = 1;i <= GameManager.Accomplishment.States.Count;i++)
         {
-            GameManager.Accomplishment._defs.TryGetValue(i, out var def);
-            GameManager.Accomplishment._states.TryGetValue(i, out var state);
+            GameManager.Accomplishment.Defs.TryGetValue(i, out var def);
+            GameManager.Accomplishment.States.TryGetValue(i, out var state);
             achieve_text[i - 1].text = def.achievementTitle;
             if (state.unlocked)
             {
