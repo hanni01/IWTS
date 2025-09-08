@@ -44,7 +44,7 @@ public class HitFeedback : MonoBehaviour
     void Awake()
     {
         // 타겟 Canvas가 지정되지 않았다면 씬에서 첫 번째 Canvas를 찾음
-        if (targetCanvas == null) targetCanvas = FindObjectOfType<Canvas>();
+        if (targetCanvas == null) targetCanvas = FindFirstObjectByType<Canvas>();
 
         // UI Image 생성: Canvas 하위에 풀스크린 오버레이로 추가
         GameObject go = new GameObject("HitSpriteUI");
