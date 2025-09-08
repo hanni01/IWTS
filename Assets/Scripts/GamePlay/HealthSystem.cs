@@ -4,10 +4,15 @@ public class HealthSystem : MonoBehaviour
 {
     public float maxHealth = 100f;
     public float currentHealth { get; private set; }
+    public bool IsStop { get; set; } = false;
 
     public bool IsDead => currentHealth <= 0f;
     public UnityEngine.Events.UnityEvent onDamaged;
     public Renderer playerRenderer;
+
+    private bool _isNotified = false;
+
+    [SerializeField] private StageMissionTracker missionTracker;
 
     private void Awake()
     {
@@ -16,12 +21,24 @@ public class HealthSystem : MonoBehaviour
 
     private void Update()
     {
+        if (IsStop) return;
+
         ChangePlayerColor(playerRenderer);
+
+        if(currentHealth < 50f)
+        {
+            if(!_isNotified)
+            {
+                if (missionTracker == null) return; 
+                missionTracker.NotifyPlayerHp50Down();
+                _isNotified = true;
+            }
+        }
     }
 
     public void ApplyDamage(float amount)
     {
-        var ending = GameObject.FindObjectOfType<EndingEffect>();
+        var ending = FindFirstObjectByType<EndingEffect>();
         if (ending != null && ending.isPlaying) return;
 
         currentHealth -= amount;
@@ -40,6 +57,10 @@ public class HealthSystem : MonoBehaviour
     {
         Debug.Log("사망! 스테이지 처음으로 돌아갑니다.");
 
+        if (missionTracker == null) return;
+
+        missionTracker.NotifyPlayerDied();
+
         UnityEngine.SceneManagement.SceneManager.LoadScene(
         UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex); // 지금 플레이한 씬 처음 불러오기
     }
@@ -53,7 +74,7 @@ public class HealthSystem : MonoBehaviour
     {
         if (playerRenderer == null) return;
 
-        var ending = GameObject.FindObjectOfType<EndingEffect>();
+        var ending = FindFirstObjectByType<EndingEffect>();
         if (ending != null && ending.isPlaying) return;
 
 

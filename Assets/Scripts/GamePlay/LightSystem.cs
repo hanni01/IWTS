@@ -2,25 +2,24 @@ using UnityEngine;
 
 public class LightSystem : MonoBehaviour
 {
-    public RenderTexture[] rTexture;   // 확인할 RenderTexture
+    // 체력 시스템
+    [SerializeField]
+    [Header("Health")]
+    public HealthSystem healthSystem;
+    [Header("Particle")]
+
+    [SerializeField] public ParticleSystem headParticleSystem;
+    [SerializeField] public float damagePerSecond = 10f;
+    [SerializeField] public RenderTexture[] rTexture;   // 확인할 RenderTexture
+    [SerializeField] public float lightThreshold = 0.48f;
+    [SerializeField] public float particleShowSeconds = 0.5f;
+
     private Texture2D tex2D;
     private bool isExposedToLight = false;
     private int textureSize;
-    public float lightThreshold = 0.48f;
-
-    // 체력 시스템
-    [Header("Health")]
-    public HealthSystem healthSystem;
-    public float damagePerSecond = 10f;
-
-    // 빛
-    private bool wasExposedToLight = false;  // 이전 프레임 노출 상태
-
-    [Header("Particle")]
-    public ParticleSystem headParticleSystem;  // GameObject 대신 ParticleSystem 참조
-
-    // 그림자로 들어간 뒤 이 시간 후 파티클 방출 중지
-    public float particleShowSeconds = 0.5f;
+    private bool wasExposedToLight = false; // 빛
+    public bool IsStop { get; set; } = false;
+    public bool lsOnShadow => !isExposedToLight;
 
     void Start()
     {
@@ -57,7 +56,20 @@ public class LightSystem : MonoBehaviour
 
     void Update()
     {
-        var ending = GameObject.FindObjectOfType<EndingEffect>();
+        if (IsStop)
+        {
+            // 진행 중인 효과 중지
+            if (headParticleSystem != null && headParticleSystem.isPlaying)
+                headParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+            SoundManager.Instance.StopLoopSFX();
+
+            // 상태 갱신
+            wasExposedToLight = false;  // 노출 상태 초기화
+            return;
+        }
+
+        var ending = FindFirstObjectByType<EndingEffect>();
         if (ending != null && ending.isPlaying) return;
 
         // 현재 햇빛 노출 판정
@@ -70,19 +82,17 @@ public class LightSystem : MonoBehaviour
         // 상태 전이 감지
         if (isExposedToLight && !wasExposedToLight)
         {
-            // 햇빛에 처음 들어옴
             Debug.Log("빛에 노출 시작!");
             SoundManager.Instance.StartLoopSFX(SoundId.longSizzle);
 
             if (headParticleSystem != null)
             {
-                headParticleSystem.Play(); // 방출 시작
+                headParticleSystem.Play();
                 CancelInvoke(nameof(DisableHeadParticle));
             }
         }
         else if (!isExposedToLight && wasExposedToLight)
         {
-            // 그림자에 처음 들어옴
             Debug.Log("빛 노출 종료!");
             SoundManager.Instance.StopLoopSFX();
 
@@ -96,6 +106,7 @@ public class LightSystem : MonoBehaviour
         // 상태 갱신
         wasExposedToLight = isExposedToLight;
     }
+
 
     void DisableHeadParticle()
     {
