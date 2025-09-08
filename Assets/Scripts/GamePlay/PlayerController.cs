@@ -50,6 +50,7 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region 내부 상태 변수
+    public bool IsStop = false;
 
     // Rigidbody 컴포넌트(이 스크립트가 제어하는 물리 몸체)
     private Rigidbody _rb;
@@ -79,6 +80,13 @@ public class PlayerController : MonoBehaviour
     // Update: 입력/상태 타이머 업데이트
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            GameManager.Stage.StopStage();
+        }
+
+        if (IsStop) return;
+
         HandleState();
         HandleTimers();
     }
@@ -86,6 +94,8 @@ public class PlayerController : MonoBehaviour
     // FixedUpdate: 물리 연산(점프, 이동, 중력) 처리
     private void FixedUpdate()
     {
+        if (IsStop) return;
+
         HandleJump();
         HandleMovement();
         HandleGravity();
@@ -238,6 +248,20 @@ public class PlayerController : MonoBehaviour
             GameManager.Stage.ClearedStage(currentStageName);
         }
         
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.name == "MirrorSectionStart")
+        {
+            Debug.Log("Mirror Section 진입");
+            MirrorObstacle[] mirrorObstacle = FindObjectsByType<MirrorObstacle>(FindObjectsSortMode.None);
+
+            foreach(var mirror in mirrorObstacle)
+            {
+                mirror.IsStop = false;
+            }
+        }
     }
 
     #endregion
