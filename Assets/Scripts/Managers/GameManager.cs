@@ -7,6 +7,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public static SceneManager Scene { get; } = new();
     public static StageManager Stage { get; } = new();
+    public static UIManager UI { get; } = new(); 
+    public static BackendManager Backend { get; } = new();
+    public static BackendGameData GameData { get; } = new();
     public static AccomplishmentManager Accomplishment { get; } = new();
 
     private bool _isDestroyManager;
@@ -36,6 +39,8 @@ public class GameManager : MonoBehaviour
             Scene,
             Stage,
             Accomplishment,
+            UI,
+            GameData,
         };
 
         foreach (var manager in managers)
@@ -59,6 +64,9 @@ public class GameManager : MonoBehaviour
             Scene,
             Stage,
             Accomplishment,
+            UI,
+            Backend,
+            GameData
         };
 
         foreach(var manager in managers)
