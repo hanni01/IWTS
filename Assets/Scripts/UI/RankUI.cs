@@ -35,9 +35,15 @@ public class RankUI : MonoBehaviour
                     MyRankPanel.GetComponentsInChildren<TMP_Text>()[1].text = myNickname;
                     MyRankPanel.GetComponentsInChildren<TMP_Text>()[2].text = info.meter;
                 });
+
+                MyRankPanel.SetActive(true);
+            }
+            else
+            {
+                MyRankPanel.SetActive(false);
             }
 
-            this.gameObject.SetActive(true);
+                this.gameObject.SetActive(true);
         });
     }
 }
