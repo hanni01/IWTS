@@ -219,27 +219,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private async void OnParticleCollision(GameObject goal)
+    private void OnParticleCollision(GameObject goal)
     {
         if (_isCollided) return;
 
         _isCollided = true;
-
-        if (goal.CompareTag("Hidden"))
-        {
-            Debug.Log("È÷µç °ñ µµ´Þ");
-            if (!GameManager.Accomplishment.IsUnlocked((int)AchievementKey.HIDDEN))
-            {
-                await GameManager.Accomplishment.UnLock((int)AchievementKey.HIDDEN);
-
-                if (UnitySceneManager.GetActiveScene().name != Scenes.START)
-                {
-                    GameManager.Scene.LoadScene(Scenes.START);
-
-                    return;
-                }
-            }
-        }
 
         if (goal.CompareTag("Goal"))
         {

@@ -49,8 +49,6 @@ public class StageManager : IManager
         {
             string nextStageName = _allStages[currentStageIdx + 1];
 
-            CheckAccomplishment(stageName);
-
             // 씬 전환은 무조건 한 번만
             if (UnitySceneManager.GetActiveScene().name != nextStageName)
             {
@@ -82,7 +80,6 @@ public class StageManager : IManager
             }
         }
 
-        CheckAccomplishment(stageName);
         CheckMissionClear(stageName);
 
         // 씬 전환은 무조건 한 번만
@@ -93,37 +90,6 @@ public class StageManager : IManager
     }
 
     public bool IsStageCleared(string stageName) => clearedStages.Contains(stageName);
-
-    public async void CheckAccomplishment(string stageName = null)
-    {
-        if (stageName != null && stageName == Scenes.TUTORIAL) return;
-
-        var player = GameObject.Find("FinalPlayer");
-        var hs = player?.GetComponent<HealthSystem>();
-
-        // 업적 조건 체크
-        if (hs != null 
-            && hs.currentHealth > 70
-            && stageName == Scenes.STEP1 
-            && !GameManager.Accomplishment.IsUnlocked((int)AchievementKey.POTENTIAL))
-        {
-            // 업적 달성 팝업 끝까지 기다린 후 다음 씬 로드
-            await GameManager.Accomplishment.UnLock((int)AchievementKey.POTENTIAL);
-        }
-
-        // ALIVE 업적
-        if (!GameManager.Accomplishment.IsUnlocked((int)AchievementKey.ALIVE) && stageName == Scenes.FINAL)
-        {
-            await GameManager.Accomplishment.UnLock((int)AchievementKey.ALIVE);
-        }
-
-        if (hs != null 
-            && hs.currentHealth > 50 
-            && !GameManager.Accomplishment.IsUnlocked((int)AchievementKey.STRONGER) && stageName == Scenes.FINAL)
-        {
-            await GameManager.Accomplishment.UnLock((int)AchievementKey.STRONGER);
-        }
-    }
 
     public void CheckMissionClear(string stageName)
     {
