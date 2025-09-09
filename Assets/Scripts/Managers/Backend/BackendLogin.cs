@@ -75,7 +75,8 @@ public class BackendLogin
         }
         else
         {
-            Debug.LogError("닉네임 변경에 실패했습니다 : " + bro);
+            var _uuid = System.Guid.NewGuid().ToString().Substring(0, 5);
+            Backend.BMember.UpdateNickname(_uuid);
         }
     }
 }
