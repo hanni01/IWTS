@@ -54,7 +54,7 @@ public class PlayerAbilityController : MonoBehaviour
     {
         float currentFill = ImgFill.fillAmount;
 
-        if (ActiveStopLight)
+        if (ActiveStopLight || ActiveGuard)
         {
             FillGazeIfOnShadow();
         }
