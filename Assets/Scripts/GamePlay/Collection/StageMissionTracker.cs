@@ -109,8 +109,8 @@ public class StageMissionTracker : MonoBehaviour
     private void EvaluateAndSave()
     {
         bool m1 = noDeath;
-        bool m2 = hp50up;
-        bool m3 = allCollected;
+        bool m2 = allCollected;
+        bool m3 = hp50up;
 
         Debug.Log($"mission1: {m1}, mission2: {m2}, mission3: {m3}");
 
