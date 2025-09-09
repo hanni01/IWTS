@@ -160,7 +160,7 @@ public class BackendManager : IManager
 
             foreach (var item in bro.GetUserLeaderboardList())
             {
-                info =  (item.rank, item.score);
+                info = (item.rank.ToString(), item.score.ToString());
             }
 
             callback(info);
