@@ -4,32 +4,15 @@ using UnityEngine.UI;
 public class GameStartUI : MonoBehaviour
 {
     [SerializeField] private Button gameStartBtn;
-    [SerializeField] private Button achievementBtn;
-    [SerializeField] private GameObject achievementPanel;
     [SerializeField] private Graphic target;
 
     private float _speed = 1f;
-
-    private void Awake()
-    {
-        achievementBtn.onClick.AddListener(() =>
-        {
-            achievementPanel.SetActive(true);
-        });
-    }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (achievementPanel.activeSelf)
-            {
-                achievementPanel.SetActive(false);
-            }
-            else
-            {
-                GameManager.Scene.LoadScene(Scenes.TUTORIAL);
-            }
+            GameManager.Backend.Initialize();
         }
 
         float t = Mathf.PingPong(Time.time * _speed, 1f);

@@ -1,133 +1,139 @@
+using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
-using Cysharp.Threading.Tasks;
+using Object = UnityEngine.Object;
 
 [System.Serializable]
-public class AchievementState
+public class MissionState
 {
-    public int id;
-    public bool unlocked;
+    public string stageName = Scenes.NONE;
+    public bool m1;
+    public bool m2;
+    public bool m3;
 }
 
-[System.Serializable]
-public class AchievementSave
+[Serializable]
+public class MissionSave
 {
-    public List<AchievementState> stateList = new List<AchievementState>();
+    public List<MissionState> missionStates = new List<MissionState>();
 }
 
 public class AccomplishmentManager : IManager
 {
+    private string missionFileName = "missions.json";
+    private string missionFilePath => Path.Combine(Application.persistentDataPath, missionFileName);
 
-    private string fileName = "achievements.json";
-    private string FilePath => Path.Combine(Application.persistentDataPath, fileName);
+    public Dictionary<string, MissionState> MissionStates { get; private set; } = new();
+    public Dictionary<string, StageMissionDefinition> MissionDefs { get; private set; } = new();
 
-    public Dictionary<int, AchievementState> _states { get; private set; } = new();
-    public Dictionary<int, AchievementDefinition> _defs { get; private set; } = new();
-
-    private GameObject _UI;
+    public bool ActiveStopLight = false;
+    public bool ActiveGuard = false;
 
     public void Initialize()
     {
         LoadDefinitionsFromResources();
         LoadOrInitStates();
 
-        _UI = GameObject.Find("UI_Accom");
-        Object.DontDestroyOnLoad(_UI);
+        ActiveStopLight = PlayerPrefs.GetString("StopLight") == "true";
+        ActiveGuard = PlayerPrefs.GetString("Guard") == "true";
+    }
+
+    public int TotalClearedMission()
+    {
+        if (MissionStates.Count <= 0) return -1;
+
+        return MissionStates.Values.Sum(m =>
+        (m.m1 ? 1 : 0) +
+        (m.m2 ? 1 : 0) +
+        (m.m3 ? 1 : 0)
+        );
     }
 
     private void LoadDefinitionsFromResources()
     {
-        _defs.Clear();
-        var defs = Resources.LoadAll<AchievementDefinition>("Achievements");
-        foreach (var def in defs)
+        MissionDefs.Clear();
+        var missionDefs = Resources.LoadAll<StageMissionDefinition>("Missions");
+        foreach (var def in missionDefs)
         {
-            if (_defs.ContainsKey(def.id))
+            if (MissionDefs.ContainsKey(def.StageName))
             {
-                Debug.LogWarning("업적 중복 ID");
+                Debug.LogWarning("미션 스테이지 중복 이름");
                 continue;
             }
-            _defs[def.id] = def;
+            MissionDefs[def.StageName] = def;
         }
-        Debug.Log("업적 에셋 로드 완료");
+        Debug.Log("미션 스테이지 에셋 로드 완료");
     }
 
     private void LoadOrInitStates()
     {
-        _states.Clear();
+        MissionStates.Clear();
 
-        AchievementSave save = null;
-        if(File.Exists(FilePath))
+        MissionSave missionSave = null;
+
+        // 미션 파일 찾기
+        if (File.Exists(missionFilePath))
         {
             try
             {
-                var json = File.ReadAllText(FilePath);
-                save = JsonUtility.FromJson<AchievementSave>(json);
+                var json = File.ReadAllText(missionFilePath);
+                missionSave = JsonUtility.FromJson<MissionSave>(json);
             }catch(System.Exception e)
             {
-                Debug.LogError($"업적 저장 파일 파싱 실패, 새로 만듭니다...{e}");
+                Debug.LogError($"미션 저장 파일 파싱 실패, 새로 만듭니다...{e}");
             }
         }
-        if (save == null) save = new AchievementSave();
 
-        foreach(var s in save.stateList)
+        if(missionSave == null) missionSave = new MissionSave();
+
+        foreach(var s in missionSave.missionStates)
         {
-            _states[s.id] = s;
+            MissionStates[s.stageName] = s;
         }
 
-        foreach(var id in _defs.Keys)
+        foreach(var name in MissionDefs.Keys)
         {
-            if (!_states.ContainsKey(id))
+            if (!MissionStates.ContainsKey(name))
             {
-                _states[id] = new AchievementState { id = id, unlocked = false };
+                MissionStates[name] = new MissionState { stageName = name, m1 = false, m2 = false, m3 = false };
             }
         }
-
-        Save();
+        MissionUpdateSave();
     }
 
-    private void Save()
+    private void MissionUpdateSave()
     {
-        var save = new AchievementSave { stateList = new List<AchievementState>(_states.Values) };
-        var json = JsonUtility.ToJson(save, true);
-        File.WriteAllText(FilePath, json);
+        var saveMission = new MissionSave { missionStates = new List<MissionState>(MissionStates.Values) };
+        var jsonMission = JsonUtility.ToJson(saveMission, true);
+        File.WriteAllText(missionFilePath, jsonMission);
     }
 
-    public async UniTask UnLock(int id)
+    public void MissionUpdate(string name, bool mission1, bool mission2, bool mission3)
     {
-        if (!_defs.ContainsKey(id)) return;
+        if(!MissionDefs.ContainsKey(name)) return;
 
-        if (!_states.TryGetValue(id, out var state))
+        if(!MissionStates.TryGetValue(name, out var mState))
         {
-            state = new AchievementState { id = id, unlocked = false };
-            _states[id] = state;
+            mState = new MissionState { stageName = name, m1 = mission1, m2 = mission2, m3 = mission3 };
+            MissionStates[name] = mState;
         }
 
-        if (!state.unlocked)
-        {
-            state.unlocked = true;
-            Save();
-            await OnUnlocked(_defs[id].achievementTitle);
-        }
+        if(!mState.m1) mState.m1 = mission1;
+        if(!mState.m2) mState.m2 = mission2;
+        if(!mState.m3) mState.m3 = mission3;
+
+        MissionUpdateSave();
     }
 
-    private async UniTask OnUnlocked(string text)
+    public bool IsClearMission(string StageName, int id)
     {
-        var AchievePopup = Resources.Load<GameObject>("UI/accomplishmentPanel");
-        var instance = Object.Instantiate(AchievePopup, _UI.transform);
-        instance.GetComponent<AchievePopupUI>().SetText(text);
-        Object.DontDestroyOnLoad(instance);
-        instance.SetActive(true);
+        MissionStates.TryGetValue(StageName, out var state);
 
-        await UniTask.Delay(1000, DelayType.UnscaledDeltaTime);
-
-        if(instance != null)
-        {
-            Object.Destroy(instance);
-        }
+        switch (id) { case 0: return state.m1; case 1: return state.m2; case 2: return state.m3; default: return false; }
     }
-
-    public bool IsUnlocked(int id) => _states.TryGetValue(id, out var state) && state.unlocked;
 
     public void Release()
     {
